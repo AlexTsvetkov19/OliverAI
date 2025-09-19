@@ -6,10 +6,12 @@ from aiogram.methods import DeleteWebhook
 from aiogram.types import Message
 import requests
 import os
+from dotenv import load_dotenv
+from pprint import pprint
 
-from get_models import response
-
-TOKEN = "8109596230:AAGmKeq9KUwZUpbwWfZJAiuauL3-Jzka9ZE"
+load_dotenv()
+TOKEN = os.getenv('TELEGRAM_TOKEN')
+IOINTELLIGENCE_API_KEY = os.getenv('IOINTELLIGENCE_API_KEY')
 
 
 logging.basicConfig(level=logging.INFO)
@@ -29,9 +31,7 @@ async def filter_messages(message: Message):
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer io-v2-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJvd25lciI6IjQxN"
-                         "2NhNzM0LWEyOGMtNGRiMi04MWEwLWI0OTU5OWJkZWIwMyIsImV4cCI6NDkxMTA3NTMzM"
-                         "30.MD-VC1NPfLkiRsG7EH2N-cmXWbzKPev_yrDMu_w5Euo4_5EAY6iLvpE1IgpQPqUWCMyef9UM2l_eB660i6XZfw"
+        "Authorization": f"Bearer {IOINTELLIGENCE_API_KEY}"
     }
 
     data = {
@@ -48,13 +48,16 @@ async def filter_messages(message: Message):
         ]
     }
 
-    response = requests.post(url, headers=headers, json=data)
-    data = response.json()
 
-    text = data['choices'][0]['message']['content']
+    response = requests.post(url, headers=headers, json=data)
+    data2 = response.json()
+    pprint(data2)
+    text = data2['choices'][0]['message']['content']
     bot_text = text.split('</think>\n')[1]
+    print(len(text))
 
     await message.answer(bot_text, parse_mode='HTML')  # Markdown
+
 
 async def main():
     await bot(DeleteWebhook(drop_pending_updates=True))
